@@ -1,25 +1,23 @@
-# docker build -t library-management-v1_2 .
+FROM openjdk:17-jdk-slim AS builder
+WORKDIR /build
+COPY src/ ./src/
+RUN mkdir -p bin && javac -d bin -encoding UTF-8 $(find src -name "*.java")
 
-# 1단계: 빌드 스테이지
-FROM bellsoft/liberica-openjdk-debian:23 AS build
+FROM openjdk:17-jdk-slim
 WORKDIR /app
+COPY --from=builder /build/bin ./bin
 
-# 모든 파일 복사 (lib 폴더 포함)
-COPY . .
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    ca-certificates \
+    && wget https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64 -O /usr/bin/ttyd \
+    && chmod +x /usr/bin/ttyd \
+    && apt-get purge -y --auto-remove wget \
+    && rm -rf /var/lib/apt/lists/*
 
-# bin 폴더 생성 및 컴파일
-# -cp 옵션으로 lib 폴더 내의 모든 jar 파일을 클래스패스에 추가합니다.
-RUN mkdir -p bin
-RUN javac -d bin -encoding UTF-8 -cp "lib/*:." src/*.java
+RUN useradd -m -u 1001 appuser && chown -R appuser:appuser /app
+USER appuser
 
-# 2단계: 실행 스테이지
-FROM bellsoft/liberica-openjdk-debian:23
-WORKDIR /app
+EXPOSE 8080
 
-# 빌드 결과물 및 라이브러리 복사
-COPY --from=build /app/bin ./bin
-COPY --from=build /app/lib ./lib
-
-# 실행 시 클래스패스(-cp)를 지정하여 메인 클래스 실행
-# bin 폴더와 lib 안의 모든 jar 파일을 포함해야 합니다.
-ENTRYPOINT ["java", "-cp", "bin:lib/*", "LibraryMain"]
+CMD ["ttyd", "-p", "8080", "-W", "java", "-cp", "bin", "LibraryMain"]
