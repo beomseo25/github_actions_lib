@@ -15,8 +15,8 @@ jobs:
     - name: Log in to Docker Hub
       uses: docker/login-action@v3
       with:
-        username: beomseo25
-        password: dckr_pat_ie2etu3rCug5Nbd-N2QnCZAcIm8
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
@@ -24,4 +24,4 @@ jobs:
         context: ./LibraryManagement_v1.2
         file: ./LibraryManagement_v1.2/Dockerfile
         push: true
-        tags: beomseo25/library-app:latest
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/library-app:latest
