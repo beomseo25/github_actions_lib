@@ -1,0 +1,27 @@
+name: Java CI with Docker Hub
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: beomseo25
+        password: dckr_pat_ie2etu3rCug5Nbd-N2QnCZAcIm8
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./LibraryManagement_v1.2
+        file: ./LibraryManagement_v1.2/Dockerfile
+        push: true
+        tags: beomseo25/library-app:latest
