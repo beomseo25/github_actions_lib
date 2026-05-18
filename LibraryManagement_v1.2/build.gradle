@@ -1,0 +1,38 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.library'
+version = '1.0'
+sourceCompatibility = '17'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // MariaDB JDBC 드라이버 의존성 추가
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.3.3'
+    
+    // JUnit 5 테스트 환경 의존성 추가
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
+
+    // SLF4J 경고를 없애고 콘솔 로그를 정상적으로 보여주는 라이브러리
+    runtimeOnly 'org.slf4j:slf4j-simple:2.0.9'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// 빌드 시 모든 의존성 라이브러리를 하나로 포함하는 Fat JAR 생성 설정
+jar {
+    manifest {
+        attributes 'Main-Class': 'LibraryMain' // 메인 클래스 지정
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

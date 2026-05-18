@@ -24,10 +24,9 @@ class LibraryRepositoryTest {
         String deleteBooks = "DELETE FROM books";
         String deleteUsers = "DELETE FROM users";
 
-        // Repository 내부의 연결 설정을 활용하거나 직접 연결하여 초기화 수행
-        // 여기서는 테스트 편의를 위해 직접 연결 예시를 포함합니다.
+        // [수정 완료] 옛날 IP(192.168.100.20)를 현재 로컬 DB 주소인 localhost로 변경했습니다.
         try (Connection conn = DriverManager.getConnection(
-                "jdbc:mariadb://192.168.100.20:3306/library", "cjulib", "security");
+                "jdbc:mariadb://localhost:3306/library", "cjulib", "security");
              Statement stmt = conn.createStatement()) {
 
             stmt.executeUpdate(deleteBooks);
