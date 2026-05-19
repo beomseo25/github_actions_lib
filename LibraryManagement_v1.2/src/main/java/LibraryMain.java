@@ -1,4 +1,4 @@
-import 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java.util.*;
+import java.util.*;
 
 /**
  * 도서 관리 시스템의 메인 클래스
@@ -11,7 +11,7 @@ public class LibraryMain {
     private static LibraryManager manager;
     private static Scanner sc = new Scanner(System.in);
 
-    public static void main(String[] args) {
+    public static void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 main(String[] args) {
         LibraryRepository repo = new LibraryRepository();
         manager = new LibraryManager(repo);
         manager.initialize();
