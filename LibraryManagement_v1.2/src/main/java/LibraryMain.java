@@ -1,4 +1,4 @@
-import java.util.*;
+import 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java.util.*;
 
 /**
  * 도서 관리 시스템의 메인 클래스
@@ -48,7 +48,7 @@ public class LibraryMain {
     private static boolean performLogin() {
         while (true) {
             System.out.println("\n로그인 하시라구~");
-            System.out.print("아이디: ");요
+            System.out.print("아이디: ");
             String id = sc.nextLine();
             System.out.print("비밀번호: ");
             String pw = sc.nextLine();
