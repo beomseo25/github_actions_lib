@@ -47,8 +47,8 @@ public class LibraryMain {
      */
     private static boolean performLogin() {
         while (true) {
-            System.out.println("\n로그인 하세용~");
-            System.out.print("아이디: ");
+            System.out.println("\n로그인 하시라구~");
+            System.out.print("아이디: ");요
             String id = sc.nextLine();
             System.out.print("비밀번호: ");
             String pw = sc.nextLine();
