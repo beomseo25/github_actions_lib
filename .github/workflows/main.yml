@@ -11,15 +11,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
     
-    # 깃허브 가상 컴퓨터에 띄울 테스트용 DB 세팅
+    # 🌟 깃허브 가상 컴퓨터에 띄울 1회용 깡통 DB 세팅
     services:
       mariadb:
         image: mariadb:latest
         env:
-          MYSQL_ROOT_PASSWORD: root      # 최고 관리자 비밀번호
-          MYSQL_DATABASE: library        # 자동 생성할 데이터베이스 이름
-          MYSQL_USER: cjulib             # 자바 코드에 적힌 진짜 DB 아이디
-          MYSQL_PASSWORD: security       # 자바 코드에 적힌 진짜 DB 비밀번호
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: library
+          MYSQL_USER: cjulib
+          MYSQL_PASSWORD: security
         ports:
           - 3306:3306
         options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -27,6 +27,12 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
+    # 🌟 [핵심] 자바 테스트 전에 schema.sql을 DB에 밀어 넣어서 테이블 뚝딱 만들기!
+    - name: Initialize Database with schema.sql
+      working-directory: ./LibraryManagement_v1.2
+      run: |
+        mysql -h 127.0.0.1 -P 3306 -u cjulib -psecurity library < schema.sql
     
     - name: Set up JDK 17
       uses: actions/setup-java@v4
@@ -62,13 +68,12 @@ jobs:
         chmod +x gradlew
         ./gradlew clean build -x test
         
-    # 바톤 넘기기 (.jar 파일을 깃허브 서버에 임시 업로드)
     - name: Upload JAR artifact
       uses: actions/upload-artifact@v4
       with:
         name: app-jar
         path: ./LibraryManagement_v1.2/build/libs/*.jar
-        retention-days: 1 # 하루 지나면 자동 삭제
+        retention-days: 1
 
   # ----------------------------------------------------
   # [Job 3] 도커 배달 (Push)
@@ -80,7 +85,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    # 바톤 받기 (아까 올린 .jar 파일을 다운로드해서 특정 폴더에 쏙 넣음)
     - name: Download JAR artifact
       uses: actions/download-artifact@v4
       with:
