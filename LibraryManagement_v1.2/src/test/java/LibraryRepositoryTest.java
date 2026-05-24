@@ -17,22 +17,34 @@ class LibraryRepositoryTest {
     }
 
     /**
-     * 테스트용 데이터가 꼬이지 않도록 모든 데이터를 삭제합니다.
+     * 테스트용 데이터가 꼬이지 않도록 테이블을 생성하고 모든 데이터를 삭제합니다.
      */
     private void clearTables() {
-        // 외래 키 제약 조건 때문에 books 테이블을 먼저 삭제해야 합니다.
-        String deleteBooks = "DELETE FROM books";
-        String deleteUsers = "DELETE FROM users";
-
-        // [수정 완료] 옛날 IP(192.168.100.20)를 현재 로컬 DB 주소인 localhost로 변경했습니다.
         try (Connection conn = DriverManager.getConnection(
                 "jdbc:mariadb://localhost:3306/library", "cjulib", "security");
              Statement stmt = conn.createStatement()) {
 
-            stmt.executeUpdate(deleteBooks);
-            stmt.executeUpdate(deleteUsers);
+            // 1. [핵심 추가] 깡통 DB일 경우 테이블부터 무조건 자동 생성!
+            String createUsersTable = "CREATE TABLE IF NOT EXISTS users (" +
+                                      "user_id VARCHAR(50) PRIMARY KEY, " +
+                                      "password VARCHAR(50), " +
+                                      "type VARCHAR(20))";
+                                      
+            String createBooksTable = "CREATE TABLE IF NOT EXISTS books (" +
+                                      "id INT PRIMARY KEY, " +
+                                      "title VARCHAR(100), " +
+                                      "author VARCHAR(100), " +
+                                      "is_available BOOLEAN, " +
+                                      "borrower_id VARCHAR(50))";
+                                      
+            stmt.executeUpdate(createUsersTable);
+            stmt.executeUpdate(createBooksTable);
 
-            // 테스트를 위한 기본 사용자(admin) 추가
+            // 2. 기존 데이터 삭제하여 무결성 유지 (테스트 격리)
+            stmt.executeUpdate("DELETE FROM books");
+            stmt.executeUpdate("DELETE FROM users");
+
+            // 3. 테스트를 위한 기본 시스템 사용자(admin) 추가
             stmt.executeUpdate("INSERT INTO users (user_id, password, type) VALUES ('admin', '1111', 'ADMIN')");
 
         } catch (SQLException e) {
@@ -91,10 +103,10 @@ class LibraryRepositoryTest {
         // 1. 객체가 null이 아닌지 확인 (조회 성공 여부)
         assertNotNull(user, "조회된 사용자 객체는 null일 수 없습니다.");
 
-        // 2. ID가 일치하는지 확인 (기존의 stream().anyMatch()를 대체)
+        // 2. ID가 일치하는지 확인
         assertEquals("admin", user.getUserId(), "조회된 ID가 'admin'이어야 합니다.");
 
-        // 3. 권한(Type)도 맞는지 확인해보면 좋습니다.
+        // 3. 권한(Type)도 맞는지 확인
         assertEquals("ADMIN", user.getRole(), "사용자 권한이 'ADMIN'이어야 합니다.");
     }
 }
