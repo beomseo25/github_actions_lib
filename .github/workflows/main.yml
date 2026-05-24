@@ -11,7 +11,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     
-    # 🌟 깃허브 가상 컴퓨터에 띄울 1회용 깡통 DB 세팅
     services:
       mariadb:
         image: mariadb:latest
@@ -28,7 +27,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    # 🌟 [핵심] 자바 테스트 전에 schema.sql을 DB에 밀어 넣어서 테이블 뚝딱 만들기!
     - name: Initialize Database with schema.sql
       working-directory: ./LibraryManagement_v1.2
       run: |
@@ -40,8 +38,13 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         
+    # 🌟 [핵심 변경] 자바에게 깃허브 가상 DB 주소(127.0.0.1)를 주입해 줍니다!
     - name: Run Tests
       working-directory: ./LibraryManagement_v1.2
+      env:
+        DB_URL: jdbc:mariadb://127.0.0.1:3306/library
+        DB_USER: cjulib
+        DB_PASSWORD: security
       run: |
         chmod +x gradlew
         ./gradlew test
@@ -50,7 +53,7 @@ jobs:
   # [Job 2] 포장 공장 (Build)
   # ----------------------------------------------------
   build:
-    needs: test # 앞선 test가 성공해야만 실행됨!
+    needs: test
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -79,7 +82,7 @@ jobs:
   # [Job 3] 도커 배달 (Push)
   # ----------------------------------------------------
   push:
-    needs: build # 앞선 build가 성공해야만 실행됨!
+    needs: build
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
