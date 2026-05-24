@@ -6,10 +6,22 @@ on:
 
 jobs:
   # ----------------------------------------------------
-  # [Job 1] 품질 검사대 (Test)
+  # [Job 1] 품질 검사대 (Test) - 🌟 가상 MariaDB 추가 완료!
   # ----------------------------------------------------
   test:
     runs-on: ubuntu-latest
+    
+    # 깃허브 가상 컴퓨터에 띄울 테스트용 DB 세팅
+    services:
+      mariadb:
+        image: mariadb:latest
+        env:
+          MYSQL_ROOT_PASSWORD: root  # 🚨 자바 코드의 DB 비밀번호와 똑같이 맞춰주세요!
+          MYSQL_DATABASE: library    # 우리가 만든 DB 이름
+        ports:
+          - 3306:3306
+        options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -48,7 +60,7 @@ jobs:
         chmod +x gradlew
         ./gradlew clean build -x test
         
-    # 🏃‍♂️ 바톤 넘기기 (만들어진 .jar 파일을 깃허브 서버에 임시 업로드)
+    # 🏃‍♂️ 바톤 넘기기 (.jar 파일을 깃허브 서버에 임시 업로드)
     - name: Upload JAR artifact
       uses: actions/upload-artifact@v4
       with:
