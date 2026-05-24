@@ -6,18 +6,20 @@ on:
 
 jobs:
   # ----------------------------------------------------
-  # [Job 1] 품질 검사대 (Test) - 🌟 가상 MariaDB 추가 완료!
+  # [Job 1] 품질 검사대 (Test)
   # ----------------------------------------------------
   test:
     runs-on: ubuntu-latest
     
-    # 깃허브 가상 컴퓨터에 띄울 테스트용 DB 세팅
+    # 🌟 깃허브 가상 컴퓨터에 띄울 테스트용 DB 세팅 (수정 완료!)
     services:
       mariadb:
         image: mariadb:latest
         env:
-          MYSQL_ROOT_PASSWORD: root  # 🚨 자바 코드의 DB 비밀번호와 똑같이 맞춰주세요!
-          MYSQL_DATABASE: library    # 우리가 만든 DB 이름
+          MYSQL_ROOT_PASSWORD: root      # 최고 관리자(root) 비밀번호 (컨테이너 구동용 필수값)
+          MYSQL_DATABASE: library        # 자동 생성할 데이터베이스 이름
+          MYSQL_USER: admin              # 👈 범서님의 자바 코드 접속 아이디 생성!
+          MYSQL_PASSWORD: 1111           # 👈 범서님의 자바 코드 접속 비밀번호 설정!
         ports:
           - 3306:3306
         options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -42,7 +44,7 @@ jobs:
   # [Job 2] 포장 공장 (Build)
   # ----------------------------------------------------
   build:
-    needs: test # 🚨 앞선 test가 성공해야만 실행됨!
+    needs: test
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -60,25 +62,23 @@ jobs:
         chmod +x gradlew
         ./gradlew clean build -x test
         
-    # 🏃‍♂️ 바톤 넘기기 (.jar 파일을 깃허브 서버에 임시 업로드)
     - name: Upload JAR artifact
       uses: actions/upload-artifact@v4
       with:
         name: app-jar
         path: ./LibraryManagement_v1.2/build/libs/*.jar
-        retention-days: 1 # 하루 지나면 찌꺼기 자동 삭제
+        retention-days: 1
 
   # ----------------------------------------------------
   # [Job 3] 도커 배달 (Push)
   # ----------------------------------------------------
   push:
-    needs: build # 🚨 앞선 build가 성공해야만 실행됨!
+    needs: build
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    # 🏃‍♂️ 바톤 받기 (아까 올린 .jar 파일을 다운로드해서 build/libs 폴더에 쏙 넣음)
     - name: Download JAR artifact
       uses: actions/download-artifact@v4
       with:
