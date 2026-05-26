@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: library-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: library
+      MYSQL_USER: cjulib
+      MYSQL_PASSWORD: security
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - mariadb-data:/var/lib/mysql 
+    restart: always
+
+  library-app:
+    # 🌟 본인의 도커 허브 ID로 꼭 수정하세요! (예: beomseo25/library-app:latest)
+    image: [본인의_도커허브_ID]/library-app:latest
+    container_name: library-backend
+    environment:
+      DB_URL: jdbc:mariadb://mariadb:3306/library
+      DB_USER: cjulib
+      DB_PASSWORD: security
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mariadb
+    restart: always
+
+volumes:
+  mariadb-data:
